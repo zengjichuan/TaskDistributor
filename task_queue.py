@@ -24,9 +24,9 @@ def send_file(hosts_file, src_file, dest_path):
 	print("......File transfer finished......")
 
 def start_workers(hosts_file, dest_file):
-	p = subprocess.Popen("pssh -i -h %s pkill -f %s"%(hosts_file, os.path.basename(dest_file)), shell=True)
+	p = subprocess.Popen("pssh -h %s pkill -f %s"%(hosts_file, os.path.basename(dest_file)), shell=True)
 	p.communicate()
-	p = subprocess.Popen("pssh -i -h %s -e exec_err.log '~/anaconda/bin/python %s > ~/out 2>&1 &'"%(hosts_file, dest_file), stdout=subprocess.PIPE, shell=True)
+	p = subprocess.Popen("pssh -i -h %s 'nohup ~/anaconda/bin/python %s > ~/out 2>&1 &'"%(hosts_file, dest_file), stdout=subprocess.PIPE, shell=True)
 	(output, err) = p.communicate()
 	print(output)
 	print("......Workers start finished......")
@@ -37,9 +37,10 @@ def main():
 	# start workers
 	start_workers('hosts.txt', '~/task_queue_worker.py')
 	
-	message = ' '.join(sys.argv[1:]) or "Hello World!"
+	message = ' '.join(sys.argv[1:]) or "Hello World!"	# define task
 	connection, channel = init_taskmq('task_queue')
-	send_task(channel, message)
+
+	send_task(channel, message)		# sent task
 
 	close_connection(connection)
 
